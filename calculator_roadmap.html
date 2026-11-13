@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What to Learn: Calculator App</title>
+<style>
+  :root { --bg:#f3f3f3; --card:#fff; --text:#1b1b1b; --muted:#666; --accent:#0067c0; --line:#e2e2e2; --ok:#107c10; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#202020; --card:#2b2b2b; --text:#f2f2f2; --muted:#a0a0a0; --accent:#4cc2ff; --line:#3c3c3c; --ok:#6ccb5f; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 "Segoe UI", system-ui, sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { margin:0 0 4px; font-size:28px; }
+  .sub { color:var(--muted); margin:0 0 16px; }
+  .progress { position:sticky; top:0; background:var(--bg); padding:10px 0; z-index:5; }
+  .bar { height:10px; background:var(--line); border-radius:99px; overflow:hidden; }
+  .bar > div { height:100%; width:0; background:var(--accent); transition:width .25s; }
+  .pcount { font-size:13px; color:var(--muted); margin-top:4px; }
+  .note { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 16px; margin-bottom:16px; }
+  details { background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; }
+  summary { cursor:pointer; padding:14px 16px; font-weight:600; list-style:none; display:flex; gap:10px; align-items:center; }
+  summary::-webkit-details-marker { display:none; }
+  .num { background:var(--accent); color:#fff; border-radius:50%; width:28px; height:28px; display:inline-grid; place-items:center; font-size:14px; flex:none; }
+  details.done .num { background:var(--ok); }
+  .time { margin-left:auto; font-weight:400; font-size:13px; color:var(--muted); }
+  .body { padding:0 16px 16px; }
+  .why { color:var(--muted); margin:0 0 8px; }
+  h4 { margin:14px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  label { display:flex; gap:8px; align-items:flex-start; padding:3px 0; cursor:pointer; }
+  input[type=checkbox] { margin-top:5px; accent-color:var(--accent); }
+  label:has(input:checked) span { text-decoration:line-through; color:var(--muted); }
+  .practice { padding:10px 12px; border-left:4px solid var(--ok); background:var(--bg); border-radius:4px; margin-top:12px; }
+  a { color:var(--accent); }
+  code { background:var(--bg); padding:1px 5px; border-radius:4px; font-size:.92em; }
+  button.reset { margin-top:16px; padding:8px 14px; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:6px; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <h1>What to Learn to Build a Calculator</h1>
+  <p class="sub">Learning path only, in order. Total: about 3–4 weeks at 1–2 hrs/day.</p>
+
+  <div class="progress">
+    <div class="bar"><div id="fill"></div></div>
+    <div class="pcount" id="count"></div>
+  </div>
+
+  <div class="note">
+    <b>How to use:</b> learn a topic, do its practice exercise <i>without</i> copying, then tick it. Main free resources:
+    <a href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noopener">MDN Learn</a> and
+    <a href="https://javascript.info" target="_blank" rel="noopener">javascript.info</a>.
+  </div>
+
+  <div id="phases"></div>
+  <button class="reset" id="reset">Reset progress</button>
+</main>
+
+<script>
+const phases = [
+  { t:"Tools & Browser Basics", time:"2–3 hrs",
+    why:"You need a place to write code and a way to see what's going wrong.",
+    topics:["How a web page works: HTML + CSS + JS files loaded by the browser","VS Code basics and the Live Server extension","Browser DevTools: Elements tab, Console tab, reading error messages","Git basics: init, add, commit"],
+    practice:"Make a folder with index.html, style.css, script.js. Link them, print a message with console.log, and commit." },
+
+  { t:"HTML Essentials", time:"3–4 hrs",
+    why:"The calculator's display and buttons are all HTML.",
+    topics:["Document structure: html, head, body","Common elements: div, button, span, input","Semantic HTML and why button beats div","Attributes: id, class, data-* attributes","Linking CSS and JS files"],
+    practice:"Build a plain page with a display div and 20 buttons. No styling yet." },
+
+  { t:"CSS Essentials", time:"5–7 hrs",
+    why:"Makes the app look like the Windows calculator.",
+    topics:["Selectors, classes, ids, specificity","Box model: margin, padding, border","Colors, fonts, units (px, rem, %)","Flexbox","CSS Grid (the key one for the button layout)","CSS variables (custom properties)","Pseudo-classes: :hover, :active, :focus-visible","Media queries and prefers-color-scheme"],
+    practice:"Style your button page into a 4-column grid with hover and pressed states, plus dark mode." },
+
+  { t:"JavaScript Fundamentals", time:"8–10 hrs",
+    why:"This is where the real learning is. The calculator logic is just JS.",
+    topics:["Variables: let and const","Data types: number, string, boolean, null, undefined","Operators: + - * / %, comparison (=== vs ==)","Converting types: Number(), parseFloat(), String(), toFixed()","Conditionals: if / else, switch","Functions: parameters, return values, arrow functions","Pure functions (same input, same output)","Arrays and loops","Objects (this will be your calculator's state)","String methods: slice, includes, indexOf","Scope and how errors/exceptions work"],
+    practice:"In the Console only: write add/subtract/multiply/divide functions, and a function that takes (a, op, b) and returns the result, with divide-by-zero handled." },
+
+  { t:"The DOM & Events", time:"4–5 hrs",
+    why:"Connects your JS logic to what the user sees and clicks.",
+    topics:["What the DOM is","Selecting: querySelector, querySelectorAll","Changing content: textContent","Changing classes: classList.add / remove / toggle","Reading data-* attributes: element.dataset","Events: click, keydown","Event object (event.target, event.key)","Event delegation (one listener for many buttons)"],
+    practice:"Make a counter page: + and − buttons update a number on screen. Then do it with one delegated listener." },
+
+  { t:"Thinking in State", time:"3–4 hrs",
+    why:"A calculator is a small state machine: what you typed, what's stored, what operator is pending.",
+    topics:["State: the data your app remembers","Separating logic (calculate) from rendering (update screen)","Flow: user action → update state → re-render","Tracing code by hand with a table of variable values","Debugging: console.log, breakpoints in DevTools"],
+    practice:"On paper, trace 12 + 7 = then 5 button by button: write the state after every press. Then code it." },
+
+  { t:"Numbers Gotchas", time:"1–2 hrs",
+    why:"Calculators break on these.",
+    topics:["Floating point: why 0.1 + 0.2 ≠ 0.3","Rounding approaches: toFixed, Math.round, scaling","Number vs string when typing digits (\"1\" + \"2\" = \"12\")","Infinity and NaN"],
+    practice:"Make a function that adds two decimals and returns a clean answer (0.1 + 0.2 → 0.3)." },
+
+  { t:"Extras for Later Features", time:"3–4 hrs",
+    why:"Only needed once the basic calculator works.",
+    topics:["Keyboard shortcuts with keydown","localStorage (save history/memory)","JSON.stringify / JSON.parse","ES modules: import / export","Simple testing with console.assert","Deploying to GitHub Pages"],
+    practice:"Save a list to localStorage and reload it after a refresh." }
+];
+
+const KEY = "calc-learning-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e) {}
+
+const root = document.getElementById("phases");
+phases.forEach((p, i) => {
+  const d = document.createElement("details");
+  if (i === 0) d.open = true;
+  d.innerHTML = `
+    <summary><span class="num">${i+1}</span>${p.t}<span class="time">${p.time}</span></summary>
+    <div class="body">
+      <p class="why">${p.why}</p>
+      <h4>Learn</h4>
+      ${p.topics.map((t,j)=>`<label><input type="checkbox" data-id="${i}-${j}" ${saved[`${i}-${j}`]?"checked":""}><span>${t.replace(/</g,"&lt;")}</span></label>`).join("")}
+      <div class="practice"><b>Practice:</b> ${p.practice}</div>
+    </div>`;
+  root.appendChild(d);
+});
+
+function update() {
+  const boxes = [...document.querySelectorAll("input[type=checkbox]")];
+  const done = boxes.filter(b => b.checked).length;
+  document.getElementById("fill").style.width = (done / boxes.length * 100) + "%";
+  document.getElementById("count").textContent = `${done} / ${boxes.length} topics`;
+  document.querySelectorAll("details").forEach(d => {
+    const cs = d.querySelectorAll("input[type=checkbox]");
+    d.classList.toggle("done", [...cs].every(c => c.checked));
+  });
+}
+root.addEventListener("change", e => {
+  if (e.target.matches("input[type=checkbox]")) {
+    saved[e.target.dataset.id] = e.target.checked;
+    try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch(err) {}
+    update();
+  }
+});
+document.getElementById("reset").onclick = () => {
+  if (!confirm("Reset all progress?")) return;
+  saved = {};
+  try { localStorage.removeItem(KEY); } catch(err) {}
+  document.querySelectorAll("input[type=checkbox]").forEach(c => c.checked = false);
+  update();
+};
+update();
+</script>
+</body>
+</html>
